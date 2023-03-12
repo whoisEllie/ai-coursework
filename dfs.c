@@ -6,9 +6,9 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define DEBUG true 
+#define DEBUG false 
 #define OUTPUT true
-#define PATH "./maze-Easy.txt" 
+#define PATH "./maze-VLarge.txt" 
 
 // Structs
 
@@ -331,7 +331,7 @@ bool depthFirstSearch(struct mazeArray *inArray, struct hashmap *visitedNodes, c
 		coords currentNode = peek();
     hashmap_set(visitedNodes, &currentNode);
 
-    if (currentNode.szudzik == endingCoords.szudzik) 
+    if (!strcmp(currentNode.szudzik, endingCoords.szudzik)) 
     {
         printf("%s and %s are equal\n", currentNode.szudzik, endingCoords.szudzik);
         if (DEBUG) {
