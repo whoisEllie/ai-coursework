@@ -6,9 +6,9 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define DEBUG false 
-#define OUTPUT false 
-#define PATH "./maze-VLarge.txt" 
+#define DEBUG true 
+#define OUTPUT true
+#define PATH "./maze-Easy.txt" 
 
 // Structs
 
@@ -24,7 +24,7 @@ typedef struct
 {
 	int x;
 	int y;
-  long szudzik;
+  char* szudzik;
 } coords;
 
 struct node
@@ -97,11 +97,42 @@ bool isEmpty(){
     return false;
 }
 
+// Hashmap helpers
+
+char* longToStr(long input)
+{
+    char* str = malloc((int)((ceil(log10(input))+1)*sizeof(char)));
+    sprintf(str, "%ld", input);
+    return str;
+}
+
+int coordsCompare(const void *a, const void *b, void *udata)
+{
+    const coords *ca = a;
+    const coords *cb = b;
+    return strcmp(ca->szudzik, cb->szudzik);
+}
+
+bool coordsIter(const void *item, void *data)
+{
+    const coords *coords = item;
+    printf("Visited node {%d,%d} with encoding %s\n", coords->x, coords->y, coords->szudzik);
+    return true;
+}
+
+uint64_t coordsHash(const void *item, uint64_t seed0, uint64_t seed1)
+{
+    const coords *coords = item;
+    return hashmap_sip(coords->szudzik, strlen(coords->szudzik), seed0, seed1);
+}
+
+
+
 // Helper functions for coordinates
 
-long szudzikEncode(int a, int b)
+char* szudzikEncode(int a, int b)
 {
-    return (a >= b? a * a + a + b : a + b * b);
+    return longToStr(a >= b? a * a + a + b : a + b * b);
 }
 
 // Helper functions for arrays 
@@ -129,35 +160,6 @@ int findPathIndexInArray(char* inArray, int arraySize)
 	}
 
 	return foundIndex;
-}
-
-// Hashmap helpers
-
-char* longToStr(long input)
-{
-    char* str = malloc((int)((ceil(log10(input))+1)*sizeof(char)));
-    sprintf(str, "%ld", input);
-    return str;
-}
-
-int coordsCompare(const void *a, const void *b, void *udata)
-{
-    const coords *ca = a;
-    const coords *cb = b;
-    return strcmp(longToStr(ca->szudzik), longToStr(cb->szudzik));
-}
-
-bool coordsIter(const void *item, void *data)
-{
-    const coords *coords = item;
-    printf("Visited node {%d,%d} with encoding %ld\n", coords->x, coords->y, coords->szudzik);
-    return true;
-}
-
-uint64_t coordsHash(const void *item, uint64_t seed0, uint64_t seed1)
-{
-    const coords *coords = item;
-    return hashmap_sip(longToStr(coords->szudzik), strlen(longToStr(coords->szudzik)), seed0, seed1);
 }
 
 // Reading from files
@@ -320,7 +322,7 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
   pop();
 }
 
-bool depthFirstSearch(struct mazeArray *inArray, struct hashmap *visitedNodes ,coords startingCoords, coords endingCoords)
+bool depthFirstSearch(struct mazeArray *inArray, struct hashmap *visitedNodes, coords startingCoords, coords endingCoords)
 {
 	push(startingCoords);
 
@@ -329,7 +331,9 @@ bool depthFirstSearch(struct mazeArray *inArray, struct hashmap *visitedNodes ,c
 		coords currentNode = peek();
     hashmap_set(visitedNodes, &currentNode);
 
-    if (currentNode.szudzik == endingCoords.szudzik) {
+    if (currentNode.szudzik == endingCoords.szudzik) 
+    {
+        printf("%s and %s are equal\n", currentNode.szudzik, endingCoords.szudzik);
         if (DEBUG) {
             printf("Found a path!!!");
         }
@@ -378,22 +382,31 @@ int main()
 	depthFirstSearch(&mazeGrid, visitedNodes, startingCoords, endingCoords);
 
   if (OUTPUT) {
-      while (!isEmpty()) {
-        coords nextCoords = pop(); 
-        mazeGrid.arr[nextCoords.x][nextCoords.y] = 'o';
-      }
+    while (!isEmpty()) {
+      coords nextCoords = pop(); 
+      mazeGrid.arr[nextCoords.x][nextCoords.y] = 'o';
+      printf("Added a visited node\n");
+    }
 
-      FILE* outFile;
-      outFile = fopen("./out.txt", "w");
+    FILE* outFile;
+    outFile = fopen("./out.ppm", "w");
 
-        int j, i;
+    fprintf(outFile, "P3 %d %d 255\n", mazeGrid.columns, mazeGrid.rows);
 
-      for (i = 0; i < mazeGrid.rows; i++) {
-        for (j = 0; j < mazeGrid.columns; j++) {
-          fprintf(outFile, "%c", mazeGrid.arr[i][j]);
-          fprintf(outFile, " ");
+    int j, i;
+
+    for (i = 0; i < mazeGrid.rows; i++) {
+      for (j = 0; j < mazeGrid.columns; j++) {
+        if (mazeGrid.arr[i][j] == '#') {
+            fprintf(outFile, "0 0 0\n");
         }
-        fprintf(outFile, "\n");
+        else if (mazeGrid.arr[i][j] == '-') {
+           fprintf(outFile, "255 255 255\n");
+        }
+        else if (mazeGrid.arr[i][j] == 'o') {
+            fprintf(outFile, "255 0 0\n");
+        }
+      }
     }  
   }
 }
