@@ -1,4 +1,5 @@
 #include "hashmap.h"
+#include "stack.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
@@ -14,88 +15,14 @@
 
 struct mazeArray 
 {
-	char** arr;
-	int rows; 
-	int columns;
-	int nodeAmount;
+	  char** arr;
+    int rows; 
+	  int columns;
+	  int nodeAmount;
 };
 
-typedef struct
-{
-	int x;
-	int y;
-  char* szudzik;
-} coords;
-
-struct node
-{
-	coords nodeCoords;
-	struct node* next;
-};
-
-struct node *head;
-
-// Stack implementation
-
-void push (coords nodeCoords){
-    struct node *ptr = (struct node*)malloc(sizeof(struct node));
-
-    if(head == NULL){
-        ptr->nodeCoords = nodeCoords;
-        ptr->next = NULL;
-        head = ptr;
-    }
-    else{
-        ptr->nodeCoords = nodeCoords;
-        ptr->next = head;
-        head=ptr;
-    }
-}
-
-coords pop(){
-    coords item;
-    struct node *ptr;
-    if (head == NULL)
-    {
-        if (DEBUG) {
-            printf("Underflow State: can't remove any item\n");
-        }
-    }
-    else
-    {
-        item = head->nodeCoords;
-        ptr = head;
-        head = head->next;
-        free(ptr);
-        if (DEBUG) {
-            printf("{%d,%d} is popped out of the stack\n", item.x, item.y);
-        }
-        return item;
-    }
-		coords emptyCoords = {0, 0};
-    return emptyCoords;
-}
-
-coords peek(){
-    coords x = head->nodeCoords;
-    if (DEBUG) {
-        printf("{%d,%d} is the top most element of the stack\n", x.x, x.y);
-    }
-    return x;
-}
-
-bool isEmpty(){
-    if(head == NULL){
-        if (DEBUG) {
-            printf("Stack is empty: Underflow State\n");
-        }
-        return true;
-    }
-    if (DEBUG) {
-        printf("Stack is not empty\n");
-    }
-    return false;
-}
+struct node *workingStack;
+struct node *reverseStack;
 
 // Hashmap helpers
 
@@ -125,8 +52,6 @@ uint64_t coordsHash(const void *item, uint64_t seed0, uint64_t seed1)
     const coords *coords = item;
     return hashmap_sip(coords->szudzik, strlen(coords->szudzik), seed0, seed1);
 }
-
-
 
 // Helper functions for coordinates
 
@@ -170,7 +95,7 @@ struct mazeArray loadFile(char* filePath)
 	FILE* fptr;
 	char c;
 
-	if (DEBUG) {
+	if (false) {
 		// opening file
 		fptr = fopen(filePath, "r");
 	
@@ -281,7 +206,7 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
             if (nodeLeft == '-') {
                 coords neighborCoords = {inCoords.x, inCoords.y-1, szudzikEncode(inCoords.x, inCoords.y-1)};
                 if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                    push(neighborCoords);
+                    push(&workingStack, neighborCoords);
                     return;
                 }
             }
@@ -291,7 +216,7 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
             if (nodeRight == '-') {
                 coords neighborCoords = {inCoords.x, inCoords.y+1, szudzikEncode(inCoords.x, inCoords.y+1)};
                 if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                    push(neighborCoords);
+                    push(&workingStack, neighborCoords);
                     return;
                 }
             }
@@ -301,7 +226,7 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
             if (nodeAbove == '-') {
                 coords neighborCoords = {inCoords.x-1, inCoords.y, szudzikEncode(inCoords.x-1, inCoords.y)};
                 if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                    push(neighborCoords);
+                    push(&workingStack, neighborCoords);
                     return;
                 }
             }
@@ -311,7 +236,7 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
             if (nodeBelow == '-') {
                 coords neighborCoords = {inCoords.x+1, inCoords.y, szudzikEncode(inCoords.x+1, inCoords.y)};
                 if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                    push(neighborCoords);
+                    push(&workingStack, neighborCoords);
                     return;
                 }
             }
@@ -323,7 +248,7 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
             if (nodeAbove == '-') {
                 coords neighborCoords = {inCoords.x-1, inCoords.y, szudzikEncode(inCoords.x-1, inCoords.y)};
                 if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                    push(neighborCoords);
+                    push(&workingStack, neighborCoords);
                     return;
                 }
             }
@@ -333,7 +258,7 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
             if (nodeBelow == '-') {
                 coords neighborCoords = {inCoords.x+1, inCoords.y, szudzikEncode(inCoords.x+1, inCoords.y)};
                 if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                    push(neighborCoords);
+                    push(&workingStack, neighborCoords);
                     return;
                 }
             }
@@ -343,7 +268,7 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
             if (nodeLeft == '-') {
                 coords neighborCoords = {inCoords.x, inCoords.y-1, szudzikEncode(inCoords.x, inCoords.y-1)};
                 if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                    push(neighborCoords);
+                    push(&workingStack, neighborCoords);
                     return;
                 }
             }
@@ -353,7 +278,7 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
             if (nodeRight == '-') {
                 coords neighborCoords = {inCoords.x, inCoords.y+1, szudzikEncode(inCoords.x, inCoords.y+1)};
                 if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                    push(neighborCoords);
+                    push(&workingStack, neighborCoords);
                     return;
                 }
             }
@@ -364,30 +289,30 @@ void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedN
         printf("Found no new neighbors for {%d,%d}\n", inCoords.x, inCoords.y);
     }
     // If the node has no unvisited neighbors, pop it from the stack
-    pop();
+    pop(&workingStack);
 }
 
 bool depthFirstSearch(struct mazeArray *inArray, struct hashmap *visitedNodes, coords startingCoords, coords endingCoords)
 {
-	push(startingCoords);
+	  push(&workingStack, startingCoords);
 
 
-	while (!isEmpty()) {
-		coords currentNode = peek();
-    hashmap_set(visitedNodes, &currentNode);
+	  while (!isEmpty(&workingStack)) {
+		    coords currentNode = peek(&workingStack);
+        hashmap_set(visitedNodes, &currentNode);
 
-    if (!strcmp(currentNode.szudzik, endingCoords.szudzik)) 
-    {
-        if (DEBUG) {
-            printf("Found a path!!!");
+        if (!strcmp(currentNode.szudzik, endingCoords.szudzik)) 
+        {
+            if (DEBUG) {
+                printf("Found a path!!!");
+            }
+            return true;
         }
-        return true;
-    }
 
-    pushNextNeighborToStack(inArray, visitedNodes, currentNode);
-	}
+        pushNextNeighborToStack(inArray, visitedNodes, currentNode);
+	  }
 
-  return false;
+    return false;
 }
 
 int main(int argc, char *argv[])
@@ -441,11 +366,16 @@ int main(int argc, char *argv[])
 
             fprintf(solutionFile, "The solution to the maze takes the following path:\n");
 
-            while (!isEmpty()) {
-                coords nextCoords = pop(); 
+            while (!isEmpty(&workingStack)) {
+                coords nextCoords = pop(&workingStack); 
+                push(&reverseStack, nextCoords);
                 mazeGrid.arr[nextCoords.x][nextCoords.y] = 'o';
-                fprintf(solutionFile, "{%d, %d}, ", nextCoords.x, nextCoords.y);
                 finalPathNodes++;
+            }
+
+            while (!isEmpty(&reverseStack)) {
+                coords nextCoords = pop(&reverseStack); 
+                fprintf(solutionFile, "{%d, %d}, ", nextCoords.x, nextCoords.y);
             }
 
             fprintf(solutionFile, "\n");
@@ -467,7 +397,7 @@ int main(int argc, char *argv[])
 
                 outPath[len-4] = '\0';
                 strncat(outPath, ".ppm", 4);
-                printf("/  A visualisation of the computed solution was stored in ./%s\n", outPath);
+                printf("/  A visualization of the computed solution was stored in ./%s\n", outPath);
                 outFile = fopen(outPath, "w");
 
                 fprintf(outFile, "P3 %d %d 255\n", mazeGrid.columns, mazeGrid.rows);
@@ -495,6 +425,14 @@ int main(int argc, char *argv[])
         }
 
         printf("No solutions found, check maze and try again\n");
+        return 1;
+    }
+    else if (argc == 1) {
+        printf("Please include the path of the maze you wish to scan as an argument\n");
+        return 1;
+    }
+    else {
+        printf("Please include just one argument - the path to the maze you wish to scan\n");
         return 1;
     }
 }
