@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <time.h>
 
 #define DEBUG false 
 #define OUTPUT true
-#define PATH "./maze-VLarge.txt" 
 
 // Structs
 
@@ -275,51 +275,96 @@ struct mazeArray loadFile(char* filePath)
 
 void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedNodes, coords inCoords)
 {
-	if (inCoords.x-1 >= 0) {
-		char nodeAbove = inArray->arr[inCoords.x-1][inCoords.y];	
-		if (nodeAbove == '-') {
-			coords neighborCoords = {inCoords.x-1, inCoords.y, szudzikEncode(inCoords.x-1, inCoords.y)};
-      if (!hashmap_get(visitedNodes, &neighborCoords)) {
-        push(neighborCoords);
-        return;
-      }
-		}
-	}
-  if (inCoords.x+1 < inArray->rows) {
-		char nodeBelow = inArray->arr[inCoords.x+1][inCoords.y];
-		if (nodeBelow == '-') {
-			coords neighborCoords = {inCoords.x+1, inCoords.y, szudzikEncode(inCoords.x+1, inCoords.y)};
-      if (!hashmap_get(visitedNodes, &neighborCoords)) {
-        push(neighborCoords);
-        return;
-      }
-		}
-	}
-  if (inCoords.y-1 >= 0) {
-		char nodeLeft = inArray->arr[inCoords.x][inCoords.y-1];
-		if (nodeLeft == '-') {
-			coords neighborCoords = {inCoords.x, inCoords.y-1, szudzikEncode(inCoords.x, inCoords.y-1)};
-      if (!hashmap_get(visitedNodes, &neighborCoords)) {
-        push(neighborCoords);
-        return;
-      }
-		}
-	}
-  if (inCoords.y+1 < inArray->columns) {
-		char nodeRight = inArray->arr[inCoords.x][inCoords.y+1];
-		if (nodeRight == '-') {
-			coords neighborCoords = {inCoords.x, inCoords.y+1, szudzikEncode(inCoords.x, inCoords.y+1)};
-      if (!hashmap_get(visitedNodes, &neighborCoords)) {
-        push(neighborCoords);
-        return;
-      }
-		}
-	}
-
-  if (DEBUG) {
-    printf("Found no new neighbors for {%d,%d}\n", inCoords.x, inCoords.y);
-  }
-  pop();
+    if (inArray->columns >= inArray->rows) {
+        if (inCoords.y-1 >= 0) {
+            char nodeLeft = inArray->arr[inCoords.x][inCoords.y-1];
+            if (nodeLeft == '-') {
+                coords neighborCoords = {inCoords.x, inCoords.y-1, szudzikEncode(inCoords.x, inCoords.y-1)};
+                if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                    push(neighborCoords);
+                    return;
+                }
+            }
+        }
+        if (inCoords.y+1 < inArray->columns) {
+            char nodeRight = inArray->arr[inCoords.x][inCoords.y+1];
+            if (nodeRight == '-') {
+                coords neighborCoords = {inCoords.x, inCoords.y+1, szudzikEncode(inCoords.x, inCoords.y+1)};
+                if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                    push(neighborCoords);
+                    return;
+                }
+            }
+        }
+        if (inCoords.x-1 >= 0) {
+            char nodeAbove = inArray->arr[inCoords.x-1][inCoords.y];	
+            if (nodeAbove == '-') {
+                coords neighborCoords = {inCoords.x-1, inCoords.y, szudzikEncode(inCoords.x-1, inCoords.y)};
+                if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                    push(neighborCoords);
+                    return;
+                }
+            }
+        }
+        if (inCoords.x+1 < inArray->rows) {
+            char nodeBelow = inArray->arr[inCoords.x+1][inCoords.y];
+            if (nodeBelow == '-') {
+                coords neighborCoords = {inCoords.x+1, inCoords.y, szudzikEncode(inCoords.x+1, inCoords.y)};
+                if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                    push(neighborCoords);
+                    return;
+                }
+            }
+        }
+    }
+    else {
+        if (inCoords.x-1 >= 0) {
+            char nodeAbove = inArray->arr[inCoords.x-1][inCoords.y];	
+            if (nodeAbove == '-') {
+                coords neighborCoords = {inCoords.x-1, inCoords.y, szudzikEncode(inCoords.x-1, inCoords.y)};
+                if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                    push(neighborCoords);
+                    return;
+                }
+            }
+        }
+        if (inCoords.x+1 < inArray->rows) {
+            char nodeBelow = inArray->arr[inCoords.x+1][inCoords.y];
+            if (nodeBelow == '-') {
+                coords neighborCoords = {inCoords.x+1, inCoords.y, szudzikEncode(inCoords.x+1, inCoords.y)};
+                if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                    push(neighborCoords);
+                    return;
+                }
+            }
+        }
+        if (inCoords.y-1 >= 0) {
+            char nodeLeft = inArray->arr[inCoords.x][inCoords.y-1];
+            if (nodeLeft == '-') {
+                coords neighborCoords = {inCoords.x, inCoords.y-1, szudzikEncode(inCoords.x, inCoords.y-1)};
+                if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                    push(neighborCoords);
+                    return;
+                }
+            }
+        }
+        if (inCoords.y+1 < inArray->columns) {
+            char nodeRight = inArray->arr[inCoords.x][inCoords.y+1];
+            if (nodeRight == '-') {
+                coords neighborCoords = {inCoords.x, inCoords.y+1, szudzikEncode(inCoords.x, inCoords.y+1)};
+                if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                    push(neighborCoords);
+                    return;
+                }
+            }
+        }
+    }
+  
+    if (DEBUG) {
+        printf("Found no new neighbors for {%d,%d}\n", inCoords.x, inCoords.y);
+    }
+    // If the node has no unvisited neighbors, pop it from the stack
+    pop();
 }
 
 bool depthFirstSearch(struct mazeArray *inArray, struct hashmap *visitedNodes, coords startingCoords, coords endingCoords)
@@ -333,7 +378,6 @@ bool depthFirstSearch(struct mazeArray *inArray, struct hashmap *visitedNodes, c
 
     if (!strcmp(currentNode.szudzik, endingCoords.szudzik)) 
     {
-        printf("%s and %s are equal\n", currentNode.szudzik, endingCoords.szudzik);
         if (DEBUG) {
             printf("Found a path!!!");
         }
@@ -346,67 +390,111 @@ bool depthFirstSearch(struct mazeArray *inArray, struct hashmap *visitedNodes, c
   return false;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-  struct hashmap *visitedNodes = hashmap_new(sizeof(coords), 0, 0, 0, coordsHash, coordsCompare, NULL, NULL);
-    
-  /*hashmap_set(visitedNodes, &(coords){ .x=4, .y=13, .szudzik=szudzikEncode(4, 13)});
-  hashmap_set(visitedNodes, &(coords){ .x=15, .y=3, .szudzik=szudzikEncode(15, 3) });
-  hashmap_set(visitedNodes, &(coords){ .x=5, .y=17, .szudzik=szudzikEncode(5, 17) });
-  hashmap_set(visitedNodes, &(coords){ .x=315, .y=18, .szudzik=szudzikEncode(315, 18) });
+    if (argc == 2) {
 
-  hashmap_scan(visitedNodes, coordsIter, NULL);
+        if (fopen(argv[1], "r") == NULL) {
+            printf("Please enter a valid path to a maze.txt file and try again.\n");
+            return 1;
+        }
 
-  coords *outCoords;
+        // Creating the hashmap
+        struct hashmap *visitedNodes = hashmap_new(sizeof(coords), 0, 0, 0, coordsHash, coordsCompare, NULL, NULL);
 
-  outCoords = hashmap_get(visitedNodes, &(coords){ .szudzik=szudzikEncode(5, 13) });
-  printf("%s\n", outCoords?"exists":"not exists");
-  //printf("Found {%d,%d}\n", outCoords->x, outCoords->y);
+        // Creating the maze
+        struct mazeArray mazeGrid = loadFile(argv[1]);
 
-  return 0;*/
+        // Finding the starting and ending nodes
+        int startingNodeIndex = findPathIndexInArray(mazeGrid.arr[0], mazeGrid.columns);
+        int endingNodeIndex = findPathIndexInArray(mazeGrid.arr[mazeGrid.rows - 1], mazeGrid.columns);
 
-	struct mazeArray mazeGrid = loadFile(PATH);
+        if (DEBUG) {
+            printf("Starting node coords: {%d,%d}\n", 0, startingNodeIndex);
+            printf("Ending node coords: {%d,%d}\n", mazeGrid.rows - 1, endingNodeIndex);
+        }
 
-	int startingNodeIndex = findPathIndexInArray(mazeGrid.arr[0], mazeGrid.columns);
-	int endingNodeIndex = findPathIndexInArray(mazeGrid.arr[mazeGrid.rows - 1], mazeGrid.columns);
+        coords startingCoords = {0, startingNodeIndex, szudzikEncode(0, startingNodeIndex)};
+        coords endingCoords = {mazeGrid.rows - 1, endingNodeIndex, szudzikEncode(mazeGrid.rows-1, endingNodeIndex)};
+      
+        clock_t begin = clock();
 
-	if (DEBUG) {
-		printf("Starting node coords: {%d,%d}\n", 0, startingNodeIndex);
-		printf("Ending node coords: {%d,%d}\n", mazeGrid.rows - 1, endingNodeIndex);
-	}
+        // Performing the depth-first search
+        if (depthFirstSearch(&mazeGrid, visitedNodes, startingCoords, endingCoords))
+        {
+            clock_t end = clock();
 
-  coords startingCoords = {0, startingNodeIndex, szudzikEncode(0, startingNodeIndex)};
-  coords endingCoords = {mazeGrid.rows - 1, endingNodeIndex, szudzikEncode(mazeGrid.rows-1, endingNodeIndex)};
-  
+            double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
-	depthFirstSearch(&mazeGrid, visitedNodes, startingCoords, endingCoords);
+            // If we have a successful result: 
 
-  if (OUTPUT) {
-    while (!isEmpty()) {
-      coords nextCoords = pop(); 
-      mazeGrid.arr[nextCoords.x][nextCoords.y] = 'o';
-      printf("Added a visited node\n");
+            char *outPath = argv[1];
+            int len = strlen(outPath);
+            outPath[len-4] = '\0';
+            strncat(outPath, "-solution.txt", 13);
+
+            // Calculate the amount of nodes in the path and output the final solution
+            
+            int finalPathNodes = 0;
+            FILE* solutionFile;
+            solutionFile = fopen(outPath, "w");
+
+            fprintf(solutionFile, "The solution to the maze takes the following path:\n");
+
+            while (!isEmpty()) {
+                coords nextCoords = pop(); 
+                mazeGrid.arr[nextCoords.x][nextCoords.y] = 'o';
+                fprintf(solutionFile, "{%d, %d}, ", nextCoords.x, nextCoords.y);
+                finalPathNodes++;
+            }
+
+            fprintf(solutionFile, "\n");
+            fclose(solutionFile);
+
+            printf("//////////////////////////////////\n");
+            printf("/  Explored %zu nodes\n", hashmap_count(visitedNodes));
+            printf("/  The final path contains %d nodes\n", finalPathNodes);
+            printf("/  The program took %fs to compute the final path\n", time_spent);
+            printf("/  The computed solution was stored in ./%s\n", outPath);
+
+            // Freeing hashmap
+            hashmap_free(visitedNodes);
+
+            // Generating the output image
+            if (OUTPUT) {
+
+                FILE* outFile;
+
+                outPath[len-4] = '\0';
+                strncat(outPath, ".ppm", 4);
+                printf("/  A visualisation of the computed solution was stored in ./%s\n", outPath);
+                outFile = fopen(outPath, "w");
+
+                fprintf(outFile, "P3 %d %d 255\n", mazeGrid.columns, mazeGrid.rows);
+
+                int j, i;
+
+                for (i = 0; i < mazeGrid.rows; i++) {
+                    for (j = 0; j < mazeGrid.columns; j++) {
+                        if (mazeGrid.arr[i][j] == '#') {
+                            fprintf(outFile, "0 0 0\n");
+                        }
+                        else if (mazeGrid.arr[i][j] == '-') {
+                            fprintf(outFile, "255 255 255\n");
+                        }
+                        else if (mazeGrid.arr[i][j] == 'o') {
+                            fprintf(outFile, "255 0 0\n");
+                        }
+                    }
+                }  
+            }
+
+            printf("//////////////////////////////////\n");
+
+            return 0;
+        }
+
+        printf("No solutions found, check maze and try again\n");
+        return 1;
     }
-
-    FILE* outFile;
-    outFile = fopen("./out.ppm", "w");
-
-    fprintf(outFile, "P3 %d %d 255\n", mazeGrid.columns, mazeGrid.rows);
-
-    int j, i;
-
-    for (i = 0; i < mazeGrid.rows; i++) {
-      for (j = 0; j < mazeGrid.columns; j++) {
-        if (mazeGrid.arr[i][j] == '#') {
-            fprintf(outFile, "0 0 0\n");
-        }
-        else if (mazeGrid.arr[i][j] == '-') {
-           fprintf(outFile, "255 255 255\n");
-        }
-        else if (mazeGrid.arr[i][j] == 'o') {
-            fprintf(outFile, "255 0 0\n");
-        }
-      }
-    }  
-  }
 }
