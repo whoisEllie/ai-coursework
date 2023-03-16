@@ -1,4 +1,4 @@
-gcc dfs.c hashmap.c stack.c -o dfs
+gcc dfs.c hashmap.c stack.c fileloader.c -o dfs
 ./dfs maze-Easy.txt
 ./dfs maze-Medium.txt
 ./dfs maze-Large.txt
