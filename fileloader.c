@@ -17,6 +17,21 @@ char** createCharArray(int m, int n)
 	return rows;
 }
 
+int findPathIndexInArray(char* inArray, int arraySize)
+{
+	int i;
+	int foundIndex = arraySize+1;
+
+	for (i=0; i<arraySize; i++) {
+		if (inArray[i] == '-') {
+			foundIndex = i;	
+			break;
+		}	
+	}
+
+	return foundIndex;
+}
+
 // Reading from files
 
 struct mazeArray loadFile(char* filePath)

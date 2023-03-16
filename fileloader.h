@@ -10,5 +10,6 @@ struct mazeArray
 };
 
 struct mazeArray loadFile(char* filePath);
+int findPathIndexInArray(char* inArray, int arraySize);
 
 #endif

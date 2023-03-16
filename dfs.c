@@ -53,32 +53,11 @@ char* szudzikEncode(int a, int b)
     return longToStr(a >= b? a * a + a + b : a + b * b);
 }
 
-// Helper functions for arrays 
-
-
-
-int findPathIndexInArray(char* inArray, int arraySize)
-{
-	int i;
-	int foundIndex = arraySize+1;
-
-	for (i=0; i<arraySize; i++) {
-		if (inArray[i] == '-') {
-			foundIndex = i;	
-			break;
-		}	
-	}
-
-	return foundIndex;
-}
-
-
-
 // DFS implementation
 
 void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedNodes, coords inCoords)
 {
-    if (inArray->columns >= inArray->rows) {
+    if (inArray->columns >= inArray->rows) { // We check this in order to be more efficient at solving mazes of different sizes
         if (inCoords.y-1 >= 0) {
             char nodeLeft = inArray->arr[inCoords.x][inCoords.y-1];
             if (nodeLeft == '-') {

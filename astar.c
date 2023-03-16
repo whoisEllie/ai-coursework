@@ -1,17 +1,63 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
+#include <string.h>
 #include "minheap.h"
 #include "hashmap.h"
+#include "stack.h"
+#include "fileloader.h"
+
+#define OUTPUT true
+#define DEBUG false
+
+struct node *outStack;
+
+// Hashmap helpers
+
+char* longToStr(long input)
+{
+    char* str = malloc((int)((ceil(log10(input))+1)*sizeof(char)));
+    sprintf(str, "%ld", input);
+    return str;
+}
+
+int keyTypeCompare(const void *a, const void *b, void *udata)
+{
+    const keyType *ka = a;
+    const keyType *kb = b;
+    return strcmp(ka->szudzik, kb->szudzik);
+}
+
+bool keyTypeIter(const void *item, void *data)
+{
+    const keyType *keyData = item;
+    printf("Visited node {%d,%d} with encoding %s\n", keyData->x, keyData->y, keyData->szudzik);
+    return true;
+}
+
+uint64_t keyTypeHash(const void *item, uint64_t seed0, uint64_t seed1)
+{
+    const keyType *keyData= item;
+    return hashmap_sip(keyData->szudzik, strlen(keyData->szudzik), seed0, seed1);
+}
 
 int heuristic(int x1, int y1, int x2, int y2)
 {
     return abs(x1 - x2) + abs(y1 - y2);
 }
 
-void astar()
+// Helper functions for coordinates
+
+char* szudzikEncode(int a, int b)
 {
-    // Enque starting node
+    return longToStr(a >= b? a * a + a + b : a + b * b);
+}
+
+bool astar()
+{
+    // Enqueue starting node
     //
     // While priority queue is not empty
     //      If the current node is our end point, break and return
@@ -19,6 +65,8 @@ void astar()
     //      Dequeue the current node
     //      Enqueue any surrounding nodes
     //      Update the evaluation and distance functions
+
+    return false;
 }
 
 /*int main(int argc, char* argv[])
@@ -53,7 +101,7 @@ int main(int argc, char *argv[])
         }
 
         // Creating the hashmap
-        struct hashmap *visitedNodes = hashmap_new(sizeof(coords), 0, 0, 0, coordsHash, coordsCompare, NULL, NULL);
+        struct hashmap *visitedNodes = hashmap_new(sizeof(coords), 0, 0, 0, keyTypeHash, keyTypeCompare, NULL, NULL);
 
         // Creating the maze
         struct mazeArray mazeGrid = loadFile(argv[1]);
@@ -67,13 +115,13 @@ int main(int argc, char *argv[])
             printf("Ending node coords: {%d,%d}\n", mazeGrid.rows - 1, endingNodeIndex);
         }
 
-        coords startingCoords = {0, startingNodeIndex, szudzikEncode(0, startingNodeIndex)};
-        coords endingCoords = {mazeGrid.rows - 1, endingNodeIndex, szudzikEncode(mazeGrid.rows-1, endingNodeIndex)};
+        keyType startingCoords = {0, startingNodeIndex, 0, 0, 0, szudzikEncode(0, startingNodeIndex)};
+        keyType endingCoords = {mazeGrid.rows - 1, endingNodeIndex, 0, 0, 0, szudzikEncode(mazeGrid.rows-1, endingNodeIndex)};
       
         clock_t begin = clock();
 
-        // Performing the depth-first search
-        if (depthFirstSearch(&mazeGrid, visitedNodes, startingCoords, endingCoords))
+        // Performing the A* search
+        if (astar())
         {
             clock_t end = clock();
 
@@ -94,15 +142,10 @@ int main(int argc, char *argv[])
 
             fprintf(solutionFile, "The solution to the maze takes the following path:\n");
 
-            while (!isEmpty(&workingStack)) {
-                coords nextCoords = pop(&workingStack); 
-                push(&reverseStack, nextCoords);
-                mazeGrid.arr[nextCoords.x][nextCoords.y] = 'o';
-                finalPathNodes++;
-            }
+            // Trace up the output path and push each node into the outStack
 
-            while (!isEmpty(&reverseStack)) {
-                coords nextCoords = pop(&reverseStack); 
+            while (!isEmpty(&outStack)) {
+                coords nextCoords = pop(&outStack); 
                 fprintf(solutionFile, "{%d, %d}, ", nextCoords.x, nextCoords.y);
             }
 

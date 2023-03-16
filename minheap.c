@@ -63,7 +63,7 @@ static void minheapSwap(minheap heap, int i, int j) {
 static void minheapFixup(minheap heap, int k) {
     assert(heap && k >= 1 && k <= heap->curSize);
     
-    while (k > 1 && heap->array[k] < heap->array[k/2]) {
+    while (k > 1 && heap->array[k].fScore < heap->array[k/2].fScore) {
         minheapSwap(heap, k/2, k);
         k /= 2;
     }
@@ -75,11 +75,11 @@ static void minheapFixdown(minheap heap, int k) {
     while (2*k <= heap->curSize) {
         int j = 2*k; 
 
-        if (j < heap->curSize && heap->array[j+1] < heap->array[j]) {
+        if (j < heap->curSize && heap->array[j+1].fScore < heap->array[j].fScore) {
             j++; 
         }
 
-        if (heap->array[k] <= heap->array[j]) {
+        if (heap->array[k].fScore <= heap->array[j].fScore) {
             break;
         }
 
@@ -101,7 +101,7 @@ void minheapInsert(minheap heap, keyType key) {
     minheapFixup(heap, heap->curSize);
 }
 
-int minheapFindMin(minheap heap) {
+keyType minheapFindMin(minheap heap) {
     if (minheapIsEmpty(heap)) {
         printf("Heap is empty!\n"); 
         abort();
