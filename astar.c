@@ -18,32 +18,35 @@ struct node *outStack;
 
 char* longToStr(long input)
 {
+    printf("Before longToStr\n");
     char* str = malloc((int)((ceil(log10(input))+1)*sizeof(char)));
-    sprintf(str, "%ld", input);
+    printf("%ld\n", input);
+    //sprintf(str, "%ld", input);
+    printf("After longToStr\n");
     return str;
 }
 
-int keyTypeCompare(const void *a, const void *b, void *udata)
+int nodeCompare(const void *a, const void *b, void *udata)
 {
-    const keyType *ka = a;
-    const keyType *kb = b;
+    const Node *ka = a;
+    const Node *kb = b;
     return strcmp(ka->szudzik, kb->szudzik);
 }
 
-bool keyTypeIter(const void *item, void *data)
+bool nodeIter(const void *item, void *data)
 {
-    const keyType *keyData = item;
+    const Node *keyData = item;
     printf("Visited node {%d,%d} with encoding %s\n", keyData->x, keyData->y, keyData->szudzik);
     return true;
 }
 
-uint64_t keyTypeHash(const void *item, uint64_t seed0, uint64_t seed1)
+uint64_t nodeHash(const void *item, uint64_t seed0, uint64_t seed1)
 {
-    const keyType *keyData= item;
-    return hashmap_sip(keyData->szudzik, strlen(keyData->szudzik), seed0, seed1);
+    const Node *Node= item;
+    return hashmap_sip(Node->szudzik, strlen(Node->szudzik), seed0, seed1);
 }
 
-int heuristic(int x1, int y1, int x2, int y2)
+int manhattan(int x1, int y1, int x2, int y2)
 {
     return abs(x1 - x2) + abs(y1 - y2);
 }
@@ -52,13 +55,108 @@ int heuristic(int x1, int y1, int x2, int y2)
 
 char* szudzikEncode(int a, int b)
 {
+    printf("Ran szudzikEncode\n");
     return longToStr(a >= b? a * a + a + b : a + b * b);
 }
 
-bool astar()
+void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes, minheap *priorityQueue, Node *parentNode, Node *targetNode)
 {
-    // Enqueue starting node
-    //
+    if (parentNode->x-1 >= 0) {
+        char nodeAbove = inArray->arr[parentNode->x-1][parentNode->y];	
+        if (nodeAbove == '-') {
+            printf("We have a valid path node\n");
+            int gScore, hScore;
+            hScore = manhattan(parentNode->x-1, parentNode->y, targetNode->x, targetNode->y);
+            printf("%d is the hScore\n", hScore);
+            gScore = parentNode->gScore + 1;
+            printf("%d is the gScore\n", gScore);
+            Node neighborCoords = {parentNode->x-1, parentNode->y, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x-1, parentNode->y)};
+            printf("Created new neighborCoords Node\n");
+            if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
+                minheapInsert(*priorityQueue, &neighborCoords);
+            }
+        }
+    }
+    if (parentNode->x+1 < inArray->rows) {
+        char nodeBelow = inArray->arr[parentNode->x+1][parentNode->y];
+        if (nodeBelow == '-') {
+            printf("We have a valid path node\n");
+            int gScore, hScore;
+            hScore = manhattan(parentNode->x+1, parentNode->y, targetNode->x, targetNode->y);
+            printf("%d is the hScore\n", hScore);
+            gScore = parentNode->gScore + 1;
+            printf("%d is the gScore\n", gScore);
+            Node neighborCoords = {parentNode->x+1, parentNode->y, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x-1, parentNode->y)};
+            printf("Created new neighborCoords Node\n");
+            if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
+                minheapInsert(*priorityQueue, &neighborCoords);
+            }
+        }
+    }
+    if (parentNode->y-1 >= 0) {
+        char nodeLeft = inArray->arr[parentNode->x][parentNode->y-1];
+        if (nodeLeft == '-') {
+            printf("We have a valid path node\n");
+            int gScore, hScore;
+            hScore = manhattan(parentNode->x, parentNode->y-1, targetNode->x, targetNode->y);
+            printf("%d is the hScore\n", hScore);
+            gScore = parentNode->gScore + 1;
+            printf("%d is the gScore\n", gScore);
+            Node neighborCoords = {parentNode->x, parentNode->y-1, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x-1, parentNode->y)};
+            printf("Created new neighborCoords Node\n");
+            if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
+                minheapInsert(*priorityQueue, &neighborCoords);
+            }
+        }
+    }
+    if (parentNode->y+1 < inArray->columns) {
+        char nodeRight = inArray->arr[parentNode->x][parentNode->y+1];
+        if (nodeRight == '-') {
+            printf("We have a valid path node\n");
+            int gScore, hScore;
+            hScore = manhattan(parentNode->x, parentNode->y+1, targetNode->x, targetNode->y);
+            printf("%d is the hScore\n", hScore);
+            gScore = parentNode->gScore + 1;
+            printf("%d is the gScore\n", gScore);
+            Node neighborCoords = {parentNode->x, parentNode->y+1, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x-1, parentNode->y)};
+            printf("Created new neighborCoords Node\n");
+            if (!hashmap_get(visitedNodes, &neighborCoords)) {
+                printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
+                minheapInsert(*priorityQueue, &neighborCoords);
+            }
+        }
+    }
+}
+
+bool astar(struct mazeArray* inArray, struct hashmap *visitedNodes, minheap *priorityQueue, Node *startingCoords, Node *endingCoords)
+{
+    minheapInsert(*priorityQueue, startingCoords);
+
+    
+    while (!minheapIsEmpty(*priorityQueue)) {
+        Node currentNode = minheapFindMin(*priorityQueue);
+        hashmap_set(visitedNodes, &currentNode);
+
+        printf("Minheap is not empty\n");
+
+        printf("The result of the comparison is: %d, where %s and %s are equal\n", strcmp(currentNode.szudzik, endingCoords->szudzik), currentNode.szudzik, endingCoords->szudzik);
+
+        if (!strcmp(currentNode.szudzik, endingCoords->szudzik)) {
+            if (DEBUG) {
+                printf("\n\nFound path!!!\n\n\n");
+            } 
+            return true;
+        }
+
+        printf("The node {%d,%d} has the lowest F-score of {%d}\n", minheapFindMin(*priorityQueue).x, minheapFindMin(*priorityQueue).y, minheapFindMin(*priorityQueue).fScore);
+        minheapDeleteMin(*priorityQueue);
+
+        enqueueSurrounding(inArray, visitedNodes, priorityQueue, startingCoords, endingCoords);
+    }
+
     // While priority queue is not empty
     //      If the current node is our end point, break and return
     //
@@ -101,7 +199,10 @@ int main(int argc, char *argv[])
         }
 
         // Creating the hashmap
-        struct hashmap *visitedNodes = hashmap_new(sizeof(coords), 0, 0, 0, keyTypeHash, keyTypeCompare, NULL, NULL);
+        struct hashmap *visitedNodes = hashmap_new(sizeof(Node), 0, 0, 0, nodeHash, nodeCompare, NULL, NULL);
+
+        // Creating the priority queue (as a minheap)
+        minheap priorityQueue = minheapCreate();
 
         // Creating the maze
         struct mazeArray mazeGrid = loadFile(argv[1]);
@@ -115,13 +216,13 @@ int main(int argc, char *argv[])
             printf("Ending node coords: {%d,%d}\n", mazeGrid.rows - 1, endingNodeIndex);
         }
 
-        keyType startingCoords = {0, startingNodeIndex, 0, 0, 0, szudzikEncode(0, startingNodeIndex)};
-        keyType endingCoords = {mazeGrid.rows - 1, endingNodeIndex, 0, 0, 0, szudzikEncode(mazeGrid.rows-1, endingNodeIndex)};
+        Node startingNode = {0, startingNodeIndex, manhattan(0, startingNodeIndex, mazeGrid.rows-1, endingNodeIndex), 0, 0, NULL, szudzikEncode(0, startingNodeIndex)};
+        Node endingCoords = {mazeGrid.rows - 1, endingNodeIndex, 0, 0, 0, NULL, szudzikEncode(mazeGrid.rows-1, endingNodeIndex)};
       
         clock_t begin = clock();
 
         // Performing the A* search
-        if (astar())
+        if (astar(&mazeGrid, visitedNodes, &priorityQueue, &startingNode, &endingCoords))
         {
             clock_t end = clock();
 

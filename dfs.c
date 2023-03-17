@@ -160,7 +160,7 @@ bool depthFirstSearch(struct mazeArray *inArray, struct hashmap *visitedNodes, c
         if (!strcmp(currentNode.szudzik, endingCoords.szudzik)) 
         {
             if (DEBUG) {
-                printf("Found a path!!!");
+                printf("\n\nFound a path!!!\n\n\n");
             }
             return true;
         }

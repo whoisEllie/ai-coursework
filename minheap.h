@@ -1,20 +1,21 @@
 #ifndef _MINHEAP_H
 #define _MINHEAP_H
 
-typedef struct
+typedef struct Node
 {
-	int x, y, fScore, gScore, dScore;
+	int x, y, fScore, gScore, hScore;
+	struct Node *parent;
 	char* szudzik;
-} keyType;
+} Node;
 
 typedef struct _minheap* minheap;
 
 minheap minheapCreate();
-minheap minheapHeapify(const keyType* array, int n);
+minheap minheapHeapify(const Node** array, int n);
 void minheapDestroy(minheap);
 
-keyType minheapFindMin(minheap);
-void minheapInsert(minheap, keyType);
+Node minheapFindMin(minheap);
+void minheapInsert(minheap, Node*);
 void minheapDeleteMin(minheap);
 
 int minheapIsEmpty(minheap);

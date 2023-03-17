@@ -4,7 +4,7 @@
 #include "minheap.h"
 
 struct _minheap {
-    keyType* array;
+    Node* array;
     int maxSize;
     int curSize;
 };
@@ -19,7 +19,7 @@ minheap minheapCreate() {
 
     heap->maxSize = 64;
     heap->curSize = 0;
-    heap->array = (keyType*)malloc(sizeof(keyType)*(heap->maxSize+1));
+    heap->array = (Node*)malloc(sizeof(Node)*(heap->maxSize+1));
 
     if (heap->array == NULL) {
         printf("Not enough memory!\n");
@@ -37,7 +37,7 @@ void minheapDestroy(minheap heap) {
 
 static void minheapDoubleCapacity(minheap heap) {
     int newMaxSize = 2 * heap->maxSize;
-    keyType* newArray = (keyType*)malloc(sizeof(keyType)*(newMaxSize+1)); 
+    Node* newArray = (Node*)malloc(sizeof(Node)*(newMaxSize+1)); 
 
     if (newArray == NULL) {
         printf("Not enough memory!\n"); 
@@ -55,7 +55,7 @@ static void minheapDoubleCapacity(minheap heap) {
 
 static void minheapSwap(minheap heap, int i, int j) {
     assert(heap && i >= 1 && i <= heap->curSize && j >= 1 && j <= heap->curSize);
-    keyType temp = heap->array[i];
+    Node temp = heap->array[i];
     heap->array[i] = heap->array[j];
     heap->array[j] = temp;
 }
@@ -88,7 +88,7 @@ static void minheapFixdown(minheap heap, int k) {
     }
 }
 
-void minheapInsert(minheap heap, keyType key) {
+void minheapInsert(minheap heap, Node *key) {
     assert(heap);
 
     // Make sure that there is enough space to insert
@@ -96,12 +96,12 @@ void minheapInsert(minheap heap, keyType key) {
         minheapDoubleCapacity(heap); 
     }
 
-    heap->array[++heap->curSize] = key;
+    heap->array[++heap->curSize] = *key;
 
     minheapFixup(heap, heap->curSize);
 }
 
-keyType minheapFindMin(minheap heap) {
+Node minheapFindMin(minheap heap) {
     if (minheapIsEmpty(heap)) {
         printf("Heap is empty!\n"); 
         abort();
@@ -138,7 +138,7 @@ void minheapClear(minheap heap) {
     heap->curSize = 0;
 }
 
-minheap minheapHeapify(const keyType *array, int n) {
+minheap minheapHeapify(const Node **array, int n) {
     assert(array && n > 0);
 
     minheap heap = (minheap)malloc(sizeof(struct _minheap));
@@ -150,7 +150,7 @@ minheap minheapHeapify(const keyType *array, int n) {
 
     heap->maxSize = n;
     heap->curSize = 0;
-    heap->array = (keyType*)malloc(sizeof(keyType)*(heap->maxSize+1));
+    heap->array = (Node*)malloc(sizeof(Node)*(heap->maxSize+1));
 
     if (heap->array == NULL) {
         printf("Not enough memory!"); 
@@ -159,7 +159,7 @@ minheap minheapHeapify(const keyType *array, int n) {
 
     heap->curSize = n;
     for (int k = 0; k < n; k++) {
-        heap->array[k+1] = array[k]; 
+        heap->array[k+1] = *array[k]; 
     }
 
     for (int k = (heap->maxSize+1)/2; k > 0; k--) {
