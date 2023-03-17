@@ -19,11 +19,17 @@ struct node *outStack;
 char* longToStr(long input)
 {
     printf("Before longToStr\n");
+    printf("Trying to allocate %d bytes of memory\n", (int)((ceil(log10(input))+1)*sizeof(char)));
     char* str = malloc((int)((ceil(log10(input))+1)*sizeof(char)));
     printf("%ld\n", input);
-    //sprintf(str, "%ld", input);
-    printf("After longToStr\n");
-    return str;
+    if (str != NULL) {
+        sprintf(str, "%ld", input);
+        printf("After longToStr\n");
+        return str;
+    }
+
+    printf("Not enough memory!\n");
+    return "";
 }
 
 int nodeCompare(const void *a, const void *b, void *udata)
@@ -55,7 +61,7 @@ int manhattan(int x1, int y1, int x2, int y2)
 
 char* szudzikEncode(int a, int b)
 {
-    printf("Ran szudzikEncode\n");
+    printf("Ran szudzikEncode on values {%d,%d}\n", a, b);
     return longToStr(a >= b? a * a + a + b : a + b * b);
 }
 
@@ -64,7 +70,7 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
     if (parentNode->x-1 >= 0) {
         char nodeAbove = inArray->arr[parentNode->x-1][parentNode->y];	
         if (nodeAbove == '-') {
-            printf("We have a valid path node\n");
+            printf("We have a valid path node at {%d,%d}\n", parentNode->x-1, parentNode->y);
             int gScore, hScore;
             hScore = manhattan(parentNode->x-1, parentNode->y, targetNode->x, targetNode->y);
             printf("%d is the hScore\n", hScore);
@@ -81,13 +87,14 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
     if (parentNode->x+1 < inArray->rows) {
         char nodeBelow = inArray->arr[parentNode->x+1][parentNode->y];
         if (nodeBelow == '-') {
-            printf("We have a valid path node\n");
+            printf("This one!\n");
+            printf("We have a valid path node at {%d,%d}\n", parentNode->x+1, parentNode->y);
             int gScore, hScore;
             hScore = manhattan(parentNode->x+1, parentNode->y, targetNode->x, targetNode->y);
             printf("%d is the hScore\n", hScore);
             gScore = parentNode->gScore + 1;
             printf("%d is the gScore\n", gScore);
-            Node neighborCoords = {parentNode->x+1, parentNode->y, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x-1, parentNode->y)};
+            Node neighborCoords = {parentNode->x+1, parentNode->y, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x+1, parentNode->y)};
             printf("Created new neighborCoords Node\n");
             if (!hashmap_get(visitedNodes, &neighborCoords)) {
                 printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
@@ -98,13 +105,13 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
     if (parentNode->y-1 >= 0) {
         char nodeLeft = inArray->arr[parentNode->x][parentNode->y-1];
         if (nodeLeft == '-') {
-            printf("We have a valid path node\n");
+            printf("We have a valid path node at {%d,%d}\n", parentNode->x, parentNode->y-1);
             int gScore, hScore;
             hScore = manhattan(parentNode->x, parentNode->y-1, targetNode->x, targetNode->y);
             printf("%d is the hScore\n", hScore);
             gScore = parentNode->gScore + 1;
             printf("%d is the gScore\n", gScore);
-            Node neighborCoords = {parentNode->x, parentNode->y-1, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x-1, parentNode->y)};
+            Node neighborCoords = {parentNode->x, parentNode->y-1, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x, parentNode->y-1)};
             printf("Created new neighborCoords Node\n");
             if (!hashmap_get(visitedNodes, &neighborCoords)) {
                 printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
@@ -115,13 +122,13 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
     if (parentNode->y+1 < inArray->columns) {
         char nodeRight = inArray->arr[parentNode->x][parentNode->y+1];
         if (nodeRight == '-') {
-            printf("We have a valid path node\n");
+            printf("We have a valid path node at {%d,%d}\n", parentNode->x, parentNode->y+1);
             int gScore, hScore;
             hScore = manhattan(parentNode->x, parentNode->y+1, targetNode->x, targetNode->y);
             printf("%d is the hScore\n", hScore);
             gScore = parentNode->gScore + 1;
             printf("%d is the gScore\n", gScore);
-            Node neighborCoords = {parentNode->x, parentNode->y+1, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x-1, parentNode->y)};
+            Node neighborCoords = {parentNode->x, parentNode->y+1, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x, parentNode->y+1)};
             printf("Created new neighborCoords Node\n");
             if (!hashmap_get(visitedNodes, &neighborCoords)) {
                 printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
