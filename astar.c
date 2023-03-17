@@ -18,16 +18,11 @@ struct node *outStack;
 
 char* longToStr(long input)
 {
-    printf("Before longToStr\n");
-    printf("Trying to allocate %d bytes of memory\n", (int)((ceil(log10(input))+1)*sizeof(char)));
     char* str = malloc((int)((ceil(log10(input))+1)*sizeof(char)));
-    printf("%ld\n", input);
     if (str != NULL) {
         sprintf(str, "%ld", input);
-        printf("After longToStr\n");
         return str;
     }
-
     printf("Not enough memory!\n");
     return "";
 }
@@ -61,116 +56,119 @@ int manhattan(int x1, int y1, int x2, int y2)
 
 char* szudzikEncode(int a, int b)
 {
-    printf("Ran szudzikEncode on values {%d,%d}\n", a, b);
     return longToStr(a >= b? a * a + a + b : a + b * b);
 }
 
 void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes, minheap *priorityQueue, Node *parentNode, Node *targetNode)
 {
+
+    printf("Enqueueing nodes surrounding {%d,%d}:\n", parentNode->x, parentNode->y);
+    if (parentNode->parent != NULL) {
+        printf("It's parent is: {%d,%d}\n", parentNode->parent->x, parentNode->parent->y);
+    }
+    else {
+        printf("parent is NULL\n");
+    }
+
     if (parentNode->x-1 >= 0) {
         char nodeAbove = inArray->arr[parentNode->x-1][parentNode->y];	
         if (nodeAbove == '-') {
-            printf("We have a valid path node at {%d,%d}\n", parentNode->x-1, parentNode->y);
             int gScore, hScore;
             hScore = manhattan(parentNode->x-1, parentNode->y, targetNode->x, targetNode->y);
-            printf("%d is the hScore\n", hScore);
             gScore = parentNode->gScore + 1;
-            printf("%d is the gScore\n", gScore);
-            Node neighborCoords = {parentNode->x-1, parentNode->y, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x-1, parentNode->y)};
-            printf("Created new neighborCoords Node\n");
-            if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
-                minheapInsert(*priorityQueue, &neighborCoords);
+            Node *neighborCoords = malloc(sizeof(Node));
+            neighborCoords->x = parentNode->x-1, neighborCoords->y = parentNode->y, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parent = parentNode, neighborCoords->szudzik = szudzikEncode(parentNode->x-1, parentNode->y);
+            if (!hashmap_get(visitedNodes, neighborCoords)) {
+                minheapInsert(*priorityQueue, neighborCoords);
+                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, neighborCoords->parent->x, neighborCoords->parent->y);
             }
         }
     }
     if (parentNode->x+1 < inArray->rows) {
         char nodeBelow = inArray->arr[parentNode->x+1][parentNode->y];
         if (nodeBelow == '-') {
-            printf("This one!\n");
-            printf("We have a valid path node at {%d,%d}\n", parentNode->x+1, parentNode->y);
             int gScore, hScore;
             hScore = manhattan(parentNode->x+1, parentNode->y, targetNode->x, targetNode->y);
-            printf("%d is the hScore\n", hScore);
             gScore = parentNode->gScore + 1;
-            printf("%d is the gScore\n", gScore);
-            Node neighborCoords = {parentNode->x+1, parentNode->y, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x+1, parentNode->y)};
-            printf("Created new neighborCoords Node\n");
-            if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
-                minheapInsert(*priorityQueue, &neighborCoords);
+            Node *neighborCoords = malloc(sizeof(Node));
+            neighborCoords->x = parentNode->x+1, neighborCoords->y = parentNode->y, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parent = parentNode, neighborCoords->szudzik = szudzikEncode(parentNode->x+1, parentNode->y);
+            if (!hashmap_get(visitedNodes, neighborCoords)) {
+                minheapInsert(*priorityQueue, neighborCoords);
+                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, neighborCoords->parent->x, neighborCoords->parent->y);
             }
         }
     }
     if (parentNode->y-1 >= 0) {
         char nodeLeft = inArray->arr[parentNode->x][parentNode->y-1];
         if (nodeLeft == '-') {
-            printf("We have a valid path node at {%d,%d}\n", parentNode->x, parentNode->y-1);
             int gScore, hScore;
             hScore = manhattan(parentNode->x, parentNode->y-1, targetNode->x, targetNode->y);
-            printf("%d is the hScore\n", hScore);
             gScore = parentNode->gScore + 1;
-            printf("%d is the gScore\n", gScore);
-            Node neighborCoords = {parentNode->x, parentNode->y-1, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x, parentNode->y-1)};
-            printf("Created new neighborCoords Node\n");
-            if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
-                minheapInsert(*priorityQueue, &neighborCoords);
+            Node *neighborCoords = malloc(sizeof(Node));
+            neighborCoords->x = parentNode->x, neighborCoords->y = parentNode->y-1, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parent = parentNode, neighborCoords->szudzik = szudzikEncode(parentNode->x, parentNode->y-1);
+            if (!hashmap_get(visitedNodes, neighborCoords)) {
+                minheapInsert(*priorityQueue, neighborCoords);
+                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, neighborCoords->parent->x, neighborCoords->parent->y);
             }
         }
     }
     if (parentNode->y+1 < inArray->columns) {
         char nodeRight = inArray->arr[parentNode->x][parentNode->y+1];
         if (nodeRight == '-') {
-            printf("We have a valid path node at {%d,%d}\n", parentNode->x, parentNode->y+1);
             int gScore, hScore;
             hScore = manhattan(parentNode->x, parentNode->y+1, targetNode->x, targetNode->y);
-            printf("%d is the hScore\n", hScore);
             gScore = parentNode->gScore + 1;
-            printf("%d is the gScore\n", gScore);
-            Node neighborCoords = {parentNode->x, parentNode->y+1, gScore + hScore, gScore, hScore, parentNode, szudzikEncode(parentNode->x, parentNode->y+1)};
-            printf("Created new neighborCoords Node\n");
-            if (!hashmap_get(visitedNodes, &neighborCoords)) {
-                printf("Not found in visiteNodes HashMap, Inserting into HEAP\n");
-                minheapInsert(*priorityQueue, &neighborCoords);
+            Node *neighborCoords = malloc(sizeof(Node));
+            neighborCoords->x = parentNode->x, neighborCoords->y = parentNode->y+1, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parent = parentNode, neighborCoords->szudzik = szudzikEncode(parentNode->x, parentNode->y+1);
+            if (!hashmap_get(visitedNodes, neighborCoords)) {
+                minheapInsert(*priorityQueue, neighborCoords);
+                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, neighborCoords->parent->x, neighborCoords->parent->y);
             }
         }
     }
 }
 
-bool astar(struct mazeArray* inArray, struct hashmap *visitedNodes, minheap *priorityQueue, Node *startingCoords, Node *endingCoords)
+bool astar(struct mazeArray* inArray, struct hashmap *visitedNodes, minheap *priorityQueue, Node startingCoords, Node *endingCoords)
 {
-    minheapInsert(*priorityQueue, startingCoords);
+    minheapInsert(*priorityQueue, &startingCoords);
 
     
     while (!minheapIsEmpty(*priorityQueue)) {
-        Node currentNode = minheapFindMin(*priorityQueue);
-        hashmap_set(visitedNodes, &currentNode);
+        Node *currentNode = minheapFindMin(*priorityQueue);
+        // This is what we are using as our parent node ._.
+        minheapDeleteMin(*priorityQueue);
+        hashmap_set(visitedNodes, currentNode);
 
         printf("Minheap is not empty\n");
 
-        printf("The result of the comparison is: %d, where %s and %s are equal\n", strcmp(currentNode.szudzik, endingCoords->szudzik), currentNode.szudzik, endingCoords->szudzik);
 
-        if (!strcmp(currentNode.szudzik, endingCoords->szudzik)) {
+        if (!strcmp(currentNode->szudzik, endingCoords->szudzik)) {
+            printf("The nodes {%d,%d} and {%d,%d} are equal\n", currentNode->x, currentNode->y, endingCoords->x, endingCoords->y);
             if (DEBUG) {
                 printf("\n\nFound path!!!\n\n\n");
             } 
+
+            while (currentNode->parent != NULL) {
+                coords logCoords = {currentNode->x, currentNode->y, currentNode->szudzik}; 
+                printf("Adding {%d,%d} to the stack\n", currentNode->x, currentNode->y);
+                printf("The parent node has the coords {%d,%d}\n", currentNode->parent->parent->x, currentNode->parent->parent->y);
+                push(&outStack, logCoords); 
+                currentNode = currentNode->parent;
+                if (currentNode->szudzik == currentNode->parent->szudzik) {
+                    break; 
+                }
+            } 
+
             return true;
         }
 
-        printf("The node {%d,%d} has the lowest F-score of {%d}\n", minheapFindMin(*priorityQueue).x, minheapFindMin(*priorityQueue).y, minheapFindMin(*priorityQueue).fScore);
-        minheapDeleteMin(*priorityQueue);
+        printf("The node {%d,%d} has the lowest F-score of %d\n", currentNode->x, currentNode->y, currentNode->fScore);
 
-        enqueueSurrounding(inArray, visitedNodes, priorityQueue, startingCoords, endingCoords);
+
+        enqueueSurrounding(inArray, visitedNodes, priorityQueue, currentNode, endingCoords);
     }
 
-    // While priority queue is not empty
-    //      If the current node is our end point, break and return
-    //
-    //      Dequeue the current node
-    //      Enqueue any surrounding nodes
-    //      Update the evaluation and distance functions
-
+    printf("Minheap is empty\n");
     return false;
 }
 
@@ -229,7 +227,7 @@ int main(int argc, char *argv[])
         clock_t begin = clock();
 
         // Performing the A* search
-        if (astar(&mazeGrid, visitedNodes, &priorityQueue, &startingNode, &endingCoords))
+        if (astar(&mazeGrid, visitedNodes, &priorityQueue, startingNode, &endingCoords))
         {
             clock_t end = clock();
 

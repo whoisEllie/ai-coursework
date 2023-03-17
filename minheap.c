@@ -101,13 +101,13 @@ void minheapInsert(minheap heap, Node *key) {
     minheapFixup(heap, heap->curSize);
 }
 
-Node minheapFindMin(minheap heap) {
+Node* minheapFindMin(minheap heap) {
     if (minheapIsEmpty(heap)) {
         printf("Heap is empty!\n"); 
         abort();
     }
 
-    return heap->array[1];
+    return &(heap->array[1]);
 }
 
 void minheapDeleteMin(minheap heap) {
