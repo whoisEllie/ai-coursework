@@ -59,16 +59,10 @@ char* szudzikEncode(int a, int b)
     return longToStr(a >= b? a * a + a + b : a + b * b);
 }
 
-void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes, minheap *priorityQueue, Node *parentNode, Node *targetNode)
+void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes, struct hashmap *nodeHeirarchy, minheap *priorityQueue, Node *parentNode, Node *targetNode)
 {
 
     printf("Enqueueing nodes surrounding {%d,%d}:\n", parentNode->x, parentNode->y);
-    if (parentNode->parent != NULL) {
-        printf("It's parent is: {%d,%d}\n", parentNode->parent->x, parentNode->parent->y);
-    }
-    else {
-        printf("parent is NULL\n");
-    }
 
     if (parentNode->x-1 >= 0) {
         char nodeAbove = inArray->arr[parentNode->x-1][parentNode->y];	
@@ -77,10 +71,11 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
             hScore = manhattan(parentNode->x-1, parentNode->y, targetNode->x, targetNode->y);
             gScore = parentNode->gScore + 1;
             Node *neighborCoords = malloc(sizeof(Node));
-            neighborCoords->x = parentNode->x-1, neighborCoords->y = parentNode->y, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parent = parentNode, neighborCoords->szudzik = szudzikEncode(parentNode->x-1, parentNode->y);
+            neighborCoords->x = parentNode->x-1, neighborCoords->y = parentNode->y, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parentSzudzik = parentNode->szudzik, neighborCoords->szudzik = szudzikEncode(parentNode->x-1, parentNode->y);
             if (!hashmap_get(visitedNodes, neighborCoords)) {
                 minheapInsert(*priorityQueue, neighborCoords);
-                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, neighborCoords->parent->x, neighborCoords->parent->y);
+                hashmap_set(nodeHeirarchy, neighborCoords);
+                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode->x, parentNode->y);
             }
         }
     }
@@ -91,10 +86,11 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
             hScore = manhattan(parentNode->x+1, parentNode->y, targetNode->x, targetNode->y);
             gScore = parentNode->gScore + 1;
             Node *neighborCoords = malloc(sizeof(Node));
-            neighborCoords->x = parentNode->x+1, neighborCoords->y = parentNode->y, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parent = parentNode, neighborCoords->szudzik = szudzikEncode(parentNode->x+1, parentNode->y);
+            neighborCoords->x = parentNode->x+1, neighborCoords->y = parentNode->y, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parentSzudzik = parentNode->szudzik, neighborCoords->szudzik = szudzikEncode(parentNode->x+1, parentNode->y);
             if (!hashmap_get(visitedNodes, neighborCoords)) {
                 minheapInsert(*priorityQueue, neighborCoords);
-                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, neighborCoords->parent->x, neighborCoords->parent->y);
+                hashmap_set(nodeHeirarchy, neighborCoords);
+                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode->x, parentNode->y);
             }
         }
     }
@@ -105,10 +101,11 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
             hScore = manhattan(parentNode->x, parentNode->y-1, targetNode->x, targetNode->y);
             gScore = parentNode->gScore + 1;
             Node *neighborCoords = malloc(sizeof(Node));
-            neighborCoords->x = parentNode->x, neighborCoords->y = parentNode->y-1, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parent = parentNode, neighborCoords->szudzik = szudzikEncode(parentNode->x, parentNode->y-1);
+            neighborCoords->x = parentNode->x, neighborCoords->y = parentNode->y-1, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parentSzudzik = parentNode->szudzik, neighborCoords->szudzik = szudzikEncode(parentNode->x, parentNode->y-1);
             if (!hashmap_get(visitedNodes, neighborCoords)) {
                 minheapInsert(*priorityQueue, neighborCoords);
-                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, neighborCoords->parent->x, neighborCoords->parent->y);
+                hashmap_set(nodeHeirarchy, neighborCoords);
+                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode->x, parentNode->y);
             }
         }
     }
@@ -119,23 +116,24 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
             hScore = manhattan(parentNode->x, parentNode->y+1, targetNode->x, targetNode->y);
             gScore = parentNode->gScore + 1;
             Node *neighborCoords = malloc(sizeof(Node));
-            neighborCoords->x = parentNode->x, neighborCoords->y = parentNode->y+1, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parent = parentNode, neighborCoords->szudzik = szudzikEncode(parentNode->x, parentNode->y+1);
+            neighborCoords->x = parentNode->x, neighborCoords->y = parentNode->y+1, neighborCoords->fScore = gScore + hScore, neighborCoords->gScore = gScore, neighborCoords->hScore = hScore, neighborCoords->parentSzudzik = parentNode->szudzik, neighborCoords->szudzik = szudzikEncode(parentNode->x, parentNode->y+1);
             if (!hashmap_get(visitedNodes, neighborCoords)) {
                 minheapInsert(*priorityQueue, neighborCoords);
-                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, neighborCoords->parent->x, neighborCoords->parent->y);
+                hashmap_set(nodeHeirarchy, neighborCoords);
+                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode->x, parentNode->y);
             }
         }
     }
 }
 
-bool astar(struct mazeArray* inArray, struct hashmap *visitedNodes, minheap *priorityQueue, Node startingCoords, Node *endingCoords)
+bool astar(struct mazeArray* inArray, struct hashmap *visitedNodes, struct hashmap *nodeHeirarchy, minheap *priorityQueue, Node *startingCoords, Node *endingCoords)
 {
-    minheapInsert(*priorityQueue, &startingCoords);
-
+    printf("Hello, world!");
+    minheapInsert(*priorityQueue, startingCoords);
+    //hashmap_set(nodeHeirarchy, startingCoords);
     
     while (!minheapIsEmpty(*priorityQueue)) {
         Node *currentNode = minheapFindMin(*priorityQueue);
-        // This is what we are using as our parent node ._.
         minheapDeleteMin(*priorityQueue);
         hashmap_set(visitedNodes, currentNode);
 
@@ -148,16 +146,15 @@ bool astar(struct mazeArray* inArray, struct hashmap *visitedNodes, minheap *pri
                 printf("\n\nFound path!!!\n\n\n");
             } 
 
-            while (currentNode->parent != NULL) {
+            /*while (!strcmp(currentNode->parentSzudzik, "")) {
                 coords logCoords = {currentNode->x, currentNode->y, currentNode->szudzik}; 
                 printf("Adding {%d,%d} to the stack\n", currentNode->x, currentNode->y);
-                printf("The parent node has the coords {%d,%d}\n", currentNode->parent->parent->x, currentNode->parent->parent->y);
                 push(&outStack, logCoords); 
                 currentNode = currentNode->parent;
                 if (currentNode->szudzik == currentNode->parent->szudzik) {
                     break; 
                 }
-            } 
+            }*/ 
 
             return true;
         }
@@ -165,7 +162,7 @@ bool astar(struct mazeArray* inArray, struct hashmap *visitedNodes, minheap *pri
         printf("The node {%d,%d} has the lowest F-score of %d\n", currentNode->x, currentNode->y, currentNode->fScore);
 
 
-        enqueueSurrounding(inArray, visitedNodes, priorityQueue, currentNode, endingCoords);
+        enqueueSurrounding(inArray, visitedNodes, nodeHeirarchy, priorityQueue, currentNode, endingCoords);
     }
 
     printf("Minheap is empty\n");
@@ -203,8 +200,9 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        // Creating the hashmap
+        // Creating the hashmaps
         struct hashmap *visitedNodes = hashmap_new(sizeof(Node), 0, 0, 0, nodeHash, nodeCompare, NULL, NULL);
+        struct hashmap *nodeHeirarchy = hashmap_new(sizeof(Node), 0, 0, 0, nodeHash, nodeCompare, NULL, NULL);
 
         // Creating the priority queue (as a minheap)
         minheap priorityQueue = minheapCreate();
@@ -223,11 +221,16 @@ int main(int argc, char *argv[])
 
         Node startingNode = {0, startingNodeIndex, manhattan(0, startingNodeIndex, mazeGrid.rows-1, endingNodeIndex), 0, 0, NULL, szudzikEncode(0, startingNodeIndex)};
         Node endingCoords = {mazeGrid.rows - 1, endingNodeIndex, 0, 0, 0, NULL, szudzikEncode(mazeGrid.rows-1, endingNodeIndex)};
+
+        hashmap_set(nodeHeirarchy, &startingNode);
+
+        return 1;
       
         clock_t begin = clock();
 
+
         // Performing the A* search
-        if (astar(&mazeGrid, visitedNodes, &priorityQueue, startingNode, &endingCoords))
+        if (astar(&mazeGrid, visitedNodes, nodeHeirarchy, &priorityQueue, &startingNode, &endingCoords))
         {
             clock_t end = clock();
 

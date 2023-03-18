@@ -4,8 +4,8 @@
 typedef struct Node
 {
 	int x, y, fScore, gScore, hScore;
-	struct Node *parent;
 	char* szudzik;
+	char* parentSzudzik;
 } Node;
 
 typedef struct _minheap* minheap;
