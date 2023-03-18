@@ -21,7 +21,6 @@ struct node *reverseStack;
 
 char* longToStr(long input)
 {
-    printf("Trying to allocate %d bytes of memory\n", (int)((ceil(log10(input))+1)*sizeof(char)));
     char* str = malloc((int)((ceil(log10(input))+1)*sizeof(char)));
     sprintf(str, "%ld", input);
     return str;

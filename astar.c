@@ -23,7 +23,9 @@ char* longToStr(long input)
         sprintf(str, "%ld", input);
         return str;
     }
-    printf("Not enough memory!\n");
+    if (DEBUG) {
+        printf("Not enough memory!\n");
+    }
     return "";
 }
 
@@ -62,7 +64,9 @@ char* szudzikEncode(int a, int b)
 void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes, struct hashmap *nodeHeirarchy, minheap *priorityQueue, Node parentNode, Node targetNode)
 {
 
-    printf("Enqueueing nodes surrounding {%d,%d}:\n", parentNode.x, parentNode.y);
+    if (DEBUG) {
+        printf("Enqueueing nodes surrounding {%d,%d}:\n", parentNode.x, parentNode.y);
+    }
 
     if (parentNode.x-1 >= 0) {
         char nodeAbove = inArray->arr[parentNode.x-1][parentNode.y];	
@@ -75,7 +79,9 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
             if (!hashmap_get(visitedNodes, neighborCoords)) {
                 minheapInsert(*priorityQueue, neighborCoords);
                 hashmap_set(nodeHeirarchy, neighborCoords);
-                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
+                if (DEBUG) {
+                    printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
+                }
             }
         }
     }
@@ -90,7 +96,9 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
             if (!hashmap_get(visitedNodes, neighborCoords)) {
                 minheapInsert(*priorityQueue, neighborCoords);
                 hashmap_set(nodeHeirarchy, neighborCoords);
-                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
+                if (DEBUG) {
+                    printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
+                }
             }
         }
     }
@@ -105,7 +113,9 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
             if (!hashmap_get(visitedNodes, neighborCoords)) {
                 minheapInsert(*priorityQueue, neighborCoords);
                 hashmap_set(nodeHeirarchy, neighborCoords);
-                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
+                if (DEBUG) {
+                    printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
+                }
             }
         }
     }
@@ -120,7 +130,9 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
             if (!hashmap_get(visitedNodes, neighborCoords)) {
                 minheapInsert(*priorityQueue, neighborCoords);
                 hashmap_set(nodeHeirarchy, neighborCoords);
-                printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
+                if (DEBUG) {
+                    printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
+                }
             }
         }
     }
@@ -128,7 +140,6 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
 
 bool astar(struct mazeArray* inArray, struct hashmap *visitedNodes, struct hashmap *nodeHeirarchy, minheap *priorityQueue, Node *startingCoords, Node endingCoords)
 {
-    printf("%s", startingCoords->szudzik);
     minheapInsert(*priorityQueue, startingCoords);
     hashmap_set(nodeHeirarchy, startingCoords);
     
@@ -137,29 +148,48 @@ bool astar(struct mazeArray* inArray, struct hashmap *visitedNodes, struct hashm
         minheapDeleteMin(*priorityQueue);
         hashmap_set(visitedNodes, &currentNode);
 
-        printf("Minheap is not empty\n");
-
+        if (DEBUG) {
+            printf("Current node has szudzikPair {%s}-(%s)\n", currentNode.szudzik, currentNode.parentSzudzik);
+        }
 
         if (!strcmp(currentNode.szudzik, endingCoords.szudzik)) {
-            printf("The nodes {%d,%d}-(%s) and {%d,%d}-(%s) are equal\n", currentNode.x, currentNode.y, currentNode.szudzik, endingCoords.x, endingCoords.y, endingCoords.szudzik);
+            if (DEBUG) {
+                printf("The nodes {%d,%d}-(%s) and {%d,%d}-(%s) are equal\n", currentNode.x, currentNode.y, currentNode.szudzik, endingCoords.x, endingCoords.y, endingCoords.szudzik);
+            }
             if (DEBUG) {
                 printf("\n\nFound path!!!\n\n\n");
             } 
 
-            /*while (!strcmp(currentNode->parentSzudzik, "")) {
-                coords logCoords = {currentNode->x, currentNode->y, currentNode->szudzik}; 
-                printf("Adding {%d,%d} to the stack\n", currentNode->x, currentNode->y);
-                push(&outStack, logCoords); 
-                currentNode = currentNode->parent;
-                if (currentNode->szudzik == currentNode->parent->szudzik) {
-                    break; 
+            Node outNode = currentNode;
+
+            while (outNode.parentSzudzik[0] != '\0') {
+                coords logCoords = {outNode.x, outNode.y, outNode.szudzik}; 
+                if (DEBUG) {
+                    printf("Adding {%d,%d} to the stack\n", outNode.x, outNode.y);
                 }
-            }*/ 
+                push(&outStack, logCoords); 
+
+
+                Node searchNode = {0, 0, 0, 0, 0, outNode.parentSzudzik, ""};
+
+                outNode = *((Node*)(hashmap_get(nodeHeirarchy, &searchNode)));
+            }
+
+            // Do it one more time for the origin node
+            coords logCoords = {outNode.x, outNode.y, outNode.szudzik}; 
+            if (DEBUG) {
+                printf("Adding {%d,%d} to the stack\n", outNode.x, outNode.y);
+            }
+            push(&outStack, logCoords); 
+
+
 
             return true;
         }
 
-        printf("The node {%d,%d} has the lowest F-score of %d\n", currentNode.x, currentNode.y, currentNode.fScore);
+        if (DEBUG) {
+            printf("The node {%d,%d} has the lowest F-score of %d\n", currentNode.x, currentNode.y, currentNode.fScore);
+        }
 
 
         enqueueSurrounding(inArray, visitedNodes, nodeHeirarchy, priorityQueue, currentNode, endingCoords);
@@ -238,7 +268,7 @@ int main(int argc, char *argv[])
             char *outPath = argv[1];
             int len = strlen(outPath);
             outPath[len-4] = '\0';
-            strncat(outPath, "-solution.txt", 13);
+            strncat(outPath, "-solution-astar.txt", 19);
 
             // Calculate the amount of nodes in the path and output the final solution
             
@@ -251,8 +281,10 @@ int main(int argc, char *argv[])
             // Trace up the output path and push each node into the outStack
 
             while (!isEmpty(&outStack)) {
-                coords nextCoords = pop(&outStack); 
+                coords nextCoords = pop(&outStack);
+                mazeGrid.arr[nextCoords.x][nextCoords.y] = 'o';
                 fprintf(solutionFile, "{%d, %d}, ", nextCoords.x, nextCoords.y);
+                finalPathNodes++;
             }
 
             fprintf(solutionFile, "\n");
@@ -273,7 +305,7 @@ int main(int argc, char *argv[])
                 FILE* outFile;
 
                 outPath[len-4] = '\0';
-                strncat(outPath, ".ppm", 4);
+                strncat(outPath, "-astar.ppm", 10);
                 printf("/  A visualization of the computed solution was stored in ./%s\n", outPath);
                 outFile = fopen(outPath, "w");
 
