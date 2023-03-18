@@ -14,7 +14,7 @@ minheap minheapCreate();
 minheap minheapHeapify(const Node** array, int n);
 void minheapDestroy(minheap);
 
-Node* minheapFindMin(minheap);
+Node minheapFindMin(minheap);
 void minheapInsert(minheap, Node*);
 void minheapDeleteMin(minheap);
 
