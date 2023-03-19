@@ -11,6 +11,7 @@
 
 #define DEBUG false 
 #define OUTPUT true
+#define FORCESINGLESEARCHPATTERN false 
 
 // Structs
 
@@ -57,7 +58,7 @@ char* szudzikEncode(int a, int b)
 
 void pushNextNeighborToStack(struct mazeArray *inArray, struct hashmap *visitedNodes, coords inCoords)
 {
-    if (inArray->columns >= inArray->rows) { // We check this in order to be more efficient at solving mazes of different sizes
+    if (inArray->columns >= inArray->rows || FORCESINGLESEARCHPATTERN) { // We check this in order to be more efficient at solving mazes of different sizes
         if (inCoords.y-1 >= 0) {
             char nodeLeft = inArray->arr[inCoords.x][inCoords.y-1];
             if (nodeLeft == '-') {
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
             char *outPath = argv[1];
             int len = strlen(outPath);
             outPath[len-4] = '\0';
-            strncat(outPath, "-solution.txt", 13);
+            strncat(outPath, "-solution-dfs.txt", 17);
 
             // Calculate the amount of nodes in the path and output the final solution
             
@@ -252,7 +253,7 @@ int main(int argc, char *argv[])
                 FILE* outFile;
 
                 outPath[len-4] = '\0';
-                strncat(outPath, ".ppm", 4);
+                strncat(outPath, "-dfs.ppm", 8);
                 printf("/  A visualization of the computed solution was stored in ./%s\n", outPath);
                 outFile = fopen(outPath, "w");
 

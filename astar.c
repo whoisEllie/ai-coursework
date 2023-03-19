@@ -83,6 +83,13 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
                     printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
                 }
             }
+            else if (parentNode.gScore-1 < ((Node*)hashmap_get(nodeHeirarchy, neighborCoords))->gScore) {
+                // Updating parent if new parent is closer to origin than old parent
+                neighborCoords->gScore = parentNode.gScore + 1;
+                neighborCoords->fScore = neighborCoords->hScore + neighborCoords->gScore;
+                neighborCoords->parentSzudzik = parentNode.szudzik;
+                hashmap_set(nodeHeirarchy, neighborCoords);
+            }
         }
     }
     if (parentNode.x+1 < inArray->rows) {
@@ -100,6 +107,14 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
                     printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
                 }
             }
+            else if (parentNode.gScore-1 < ((Node*)hashmap_get(nodeHeirarchy, neighborCoords))->gScore) {
+                // Updating parent if new parent is closer to origin than old parent
+                neighborCoords->gScore = parentNode.gScore + 1;
+                neighborCoords->fScore = neighborCoords->hScore + neighborCoords->gScore;
+                neighborCoords->parentSzudzik = parentNode.szudzik;
+                hashmap_set(nodeHeirarchy, neighborCoords);
+            }
+
         }
     }
     if (parentNode.y-1 >= 0) {
@@ -117,6 +132,14 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
                     printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
                 }
             }
+            else if (parentNode.gScore-1 < ((Node*)hashmap_get(nodeHeirarchy, neighborCoords))->gScore) {
+                // Updating parent if new parent is closer to origin than old parent
+                neighborCoords->gScore = parentNode.gScore + 1;
+                neighborCoords->fScore = neighborCoords->hScore + neighborCoords->gScore;
+                neighborCoords->parentSzudzik = parentNode.szudzik;
+                hashmap_set(nodeHeirarchy, neighborCoords);
+            }
+
         }
     }
     if (parentNode.y+1 < inArray->columns) {
@@ -134,6 +157,14 @@ void enqueueSurrounding(struct mazeArray *inArray, struct hashmap *visitedNodes,
                     printf("Added {%d,%d} to the queue, with parent {%d,%d}\n", neighborCoords->x, neighborCoords->y, parentNode.x, parentNode.y);
                 }
             }
+            else if (parentNode.gScore-1 < ((Node*)hashmap_get(nodeHeirarchy, neighborCoords))->gScore) {
+                // Updating parent if new parent is closer to origin than old parent
+                neighborCoords->gScore = parentNode.gScore + 1;
+                neighborCoords->fScore = neighborCoords->hScore + neighborCoords->gScore;
+                neighborCoords->parentSzudzik = parentNode.szudzik;
+                hashmap_set(nodeHeirarchy, neighborCoords);
+            }
+
         }
     }
 }
