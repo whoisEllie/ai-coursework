@@ -230,12 +230,17 @@ int main(int argc, char *argv[])
                 finalPathNodes++;
             }
 
+            bool writing = false;
+
             while (!isEmpty(&reverseStack)) {
+                if (writing) {
+                    fprintf(solutionFile, ", ");
+                }
                 coords nextCoords = pop(&reverseStack); 
-                fprintf(solutionFile, "{%d, %d}, ", nextCoords.x, nextCoords.y);
+                fprintf(solutionFile, "{%d, %d}", nextCoords.x, nextCoords.y);
+                writing = true;
             }
 
-            fprintf(solutionFile, "\n");
             fclose(solutionFile);
 
             printf("//////////////////////////////////\n");

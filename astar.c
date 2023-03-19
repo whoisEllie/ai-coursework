@@ -310,15 +310,20 @@ int main(int argc, char *argv[])
             fprintf(solutionFile, "The solution to the maze takes the following path:\n");
 
             // Trace up the output path and push each node into the outStack
+            
+            bool writing = false;
 
             while (!isEmpty(&outStack)) {
+                if (writing) {
+                    fprintf(solutionFile, ", ");
+                }
                 coords nextCoords = pop(&outStack);
                 mazeGrid.arr[nextCoords.x][nextCoords.y] = 'o';
-                fprintf(solutionFile, "{%d, %d}, ", nextCoords.x, nextCoords.y);
+                fprintf(solutionFile, "{%d, %d}", nextCoords.x, nextCoords.y);
+                writing = true;
                 finalPathNodes++;
             }
 
-            fprintf(solutionFile, "\n");
             fclose(solutionFile);
 
             printf("//////////////////////////////////\n");
