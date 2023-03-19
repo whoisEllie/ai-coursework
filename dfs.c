@@ -1,4 +1,4 @@
-#include "hashmap.h"
+#include "./Hashmap/hashmap.h"
 #include "stack.h"
 #include "fileloader.h"
 #include <stdint.h>

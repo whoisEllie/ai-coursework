@@ -5,7 +5,7 @@
 #include <math.h>
 #include <string.h>
 #include "minheap.h"
-#include "hashmap.h"
+#include "./Hashmap/hashmap.h"
 #include "stack.h"
 #include "fileloader.h"
 

@@ -1,4 +1,4 @@
-gcc dfs.c hashmap.c stack.c fileloader.c -o dfs
+gcc dfs.c ./Hashmap/hashmap.c stack.c fileloader.c -o dfs
 echo "Running DFS search:"
 ./dfs maze-Easy.txt
 ./dfs maze-Medium.txt
@@ -16,7 +16,7 @@ rm ./maze-Large-dfs.ppm
 rm ./maze-VLarge-dfs.ppm
 echo ""
 
-gcc astar.c minheap.c stack.c hashmap.c fileloader.c -o astar
+gcc astar.c minheap.c stack.c ./Hashmap/hashmap.c fileloader.c -o astar
 echo "Running A* search:"
 ./astar maze-Easy.txt
 ./astar maze-Medium.txt
